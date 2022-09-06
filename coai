@@ -1,0 +1,49 @@
+#!/bin/bash -e
+color() {
+	printf '\033[%sm%s\033[m\n' "$@"
+}
+
+SECRET=secret
+if [ ! -d "$SECRET" ]; then
+	mkdir $SECRET
+	echo "Creating folder $SECRET"
+fi
+
+if [ ! -d "storage" ]; then
+	mkdir storage
+	echo "Creating folder storage"
+fi
+cd secret
+PUBLIC_KEY=public.pem
+PRIVATE_KEY=private.pem
+if [ -f "$PRIVATE_KEY" ]; then
+	rm $PUBLIC_KEY $PRIVATE_KEY
+	echo "$PUBLIC_KEY and $PRIVATE_KEY is removed"
+fi
+openssl genrsa -out $PRIVATE_KEY 2048
+openssl rsa -in $PRIVATE_KEY -out $PUBLIC_KEY -pubout -outform PEM
+cd ..
+
+VARS=exports
+if [ ! -f "$VARS" ]; then
+	color '31;1' "Error! file $VARS doesn't exists!" >&2
+	exit 64
+fi
+chmod 755 $VARS
+
+IFS=$'\n'
+echo "Export out credential secret"
+for entries in $(./$VARS); do
+    variable=$(echo $entries|awk -F"=" '{print $1}');
+    export $entries
+    eval current_variable=\$$variable
+done
+./$VARS
+chmod 755 config/cfg
+./config/cfg
+
+echo "Unset credential secret "
+for entries in $(./$VARS); do
+    variable=$(echo $entries|awk -F"=" '{print $1}');
+    unset $variable
+done
