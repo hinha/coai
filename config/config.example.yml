@@ -1,0 +1,51 @@
+database:
+  drivers:
+    mysql:
+      db_name: EXAMPLE
+      host: EXAMPLE
+      password: EXAMPLE
+      port: 3306
+      username: EXAMPLE
+
+redis:
+  instances:
+    redis:
+      driver: redis
+      name: redis
+      host: "localhost"
+      port: 6379
+      db: 0
+
+jwt:
+  # expire by default time minutes
+  expire: 60
+  # path to file signature aes private key ./secret/key.private
+  private_key: EXAMPLE
+  # path to file signature aes public key ./secret/key.public
+  public_key: EXAMPLE
+  # simple secret jwt by string
+  secret_key: EXAMPLE
+
+log:
+  # output must type file, console, stdout
+  # stdout it's possible multiple handlers both of them console and file handler.
+  output: stdout
+  # format must type text or json
+  format: console
+  file:
+    path: storage/app.log
+  timefield: timestamp
+  timeformat: "2006/01/02 15:04:05.000"
+  encrypted: false
+
+profiler:
+  enabled: false
+  server: http://localhost:4040
+
+server:
+  host: localhost
+  name: COAI
+  port: 8000
+  timeout: 60
+  mode: dev
+  secret_key: EXAMPLE
