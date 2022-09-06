@@ -36,6 +36,7 @@ type Config struct {
 	Log struct {
 		Output LogOutput `yaml:"output"`
 		Format string    `yaml:"format"`
+		Color  bool      `yaml:"color"`
 		File   struct {
 			Path string `yaml:"path"`
 		} `yaml:"file"`

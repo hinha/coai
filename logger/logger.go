@@ -12,6 +12,9 @@ import (
 func NewZap(f *os.File, cfg *config.Config) (zl *zap.Logger) {
 	zapConfig := ZapConfig(cfg)
 	zapConfig.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(cfg.Log.TimeFormat)
+	if cfg.Log.Color {
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	}
 
 	fileEncoder := zapcore.NewJSONEncoder(zapConfig.EncoderConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zapConfig.EncoderConfig)
