@@ -64,8 +64,8 @@ type Jwt struct {
 }
 
 // LoadSecret reads the file from path and return Secret
-func LoadSecret(path string) (*Config, error) {
-	data, err := ioutil.ReadFile(path)
+func LoadSecret() (*Config, error) {
+	data, err := ioutil.ReadFile("./config/config.yml")
 	if err != nil {
 		return nil, err
 	}
