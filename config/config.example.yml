@@ -32,6 +32,7 @@ log:
   output: stdout
   # format must type text or json
   format: console
+  color: true
   file:
     path: storage/app.log
   timefield: timestamp
