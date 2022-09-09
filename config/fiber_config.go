@@ -8,9 +8,10 @@ import (
 
 func FiberConfig(cfg *Config) fiber.Config {
 	return fiber.Config{
-		AppName:           cfg.Server.Name,
-		ReadTimeout:       time.Second * time.Duration(cfg.Server.Timeout),
-		ReduceMemoryUsage: true,
-		CaseSensitive:     true,
+		AppName:               cfg.Server.Name,
+		ReadTimeout:           time.Second * time.Duration(cfg.Server.Timeout),
+		ReduceMemoryUsage:     true,
+		CaseSensitive:         true,
+		DisableStartupMessage: true,
 	}
 }
