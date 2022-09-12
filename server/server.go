@@ -51,8 +51,8 @@ func NewServer(lc fx.Lifecycle, cfg *config.Config, logger *logger.Logger, optio
 	}
 	// TODO: move handling inside fx injector
 	options = append(options, WithTelemetry(cfg.Server.Name, "0.0.0.0:4317"))
+
 	// loop through our parsing options and apply them
-	fmt.Println(options)
 	for _, option := range options {
 		option(s)
 	}
