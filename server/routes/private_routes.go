@@ -1,8 +1,9 @@
 package routes
 
 import (
+	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
-
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/hinha/coai/accounts/handlers"
 )
 
@@ -10,6 +11,11 @@ import (
 func PrivateRoutes(a *fiber.App) {
 	// Create routes group.
 	route := a.Group("/api/v1")
+
+	route.Use(
+		cors.New(),
+		otelfiber.Middleware(a.Config().AppName),
+	)
 
 	// handler Auth
 	authHandler := handlers.NewAuthHandler()
