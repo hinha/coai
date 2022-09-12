@@ -41,7 +41,7 @@ func main() {
 	}()
 
 	app := fx.New(
-		fx.Provide(config.LoadSecret, logger.NewLogger, server.WithTelemetry),
+		fx.Provide(config.LoadSecret, logger.NewLogger),
 		fx.Provide(server.NewServer),
 		fx.Invoke(server.InitFiber),
 		fx.WithLogger(func(log *logger.Logger) fxevent.Logger {

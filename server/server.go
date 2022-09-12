@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/hinha/coai/config"
+	"github.com/hinha/coai/internal/telemetry/exporter"
+	"github.com/hinha/coai/internal/telemetry/metric"
+	"github.com/hinha/coai/internal/telemetry/trace"
 	"github.com/hinha/coai/logger"
 	"github.com/hinha/coai/server/middlewares"
 	"github.com/hinha/coai/server/routes"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric/global"
+	"go.opentelemetry.io/otel/propagation"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"os"
@@ -41,20 +47,40 @@ func InitFiber(srv *Server) {
 		zap.String("mode", string(srv.config.Server.Mode)),
 		zap.Int("processes", os.Getpid()),
 	)
+
+	// define
+	if srv.config.Otel.Enabled {
+		metricExporter := exporter.NewMetricOTLP(srv.config.Otel.Server, srv.logger)
+		pusher, pusherCloseFn, err := metric.NewMeterProviderBuilder().
+			SetExporter(metricExporter).
+			SetHistogramBoundaries([]float64{5, 10, 25, 50, 100, 200, 400, 800, 1000}).
+			Build()
+		if err != nil {
+			srv.logger.LogDefault().Error("failed initializing the metric provider", zap.Error(err))
+		}
+		srv.Closers = append(srv.Closers, pusherCloseFn)
+		global.SetMeterProvider(pusher)
+
+		spanExporter := exporter.NewTraceOTLP(srv.config.Otel.Server, srv.logger)
+		tracerProvider, tracerProviderCloseFn, err := trace.NewTraceProviderBuilder(srv.config.Server.Name, srv.logger).
+			SetExporter(spanExporter).
+			Build()
+		if err != nil {
+			srv.logger.LogDefault().Error("failed initializing the tracer provider", zap.Error(err))
+		}
+		srv.Closers = append(srv.Closers, tracerProviderCloseFn)
+
+		// set global propagator to trace context (the default is no-op).
+		otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+		otel.SetTracerProvider(tracerProvider)
+	}
 }
 
 // NewServer ...
-func NewServer(lc fx.Lifecycle, cfg *config.Config, logger *logger.Logger, options ...Option) *Server {
+func NewServer(lc fx.Lifecycle, cfg *config.Config, logger *logger.Logger) *Server {
 	s := &Server{
 		logger: logger,
 		config: cfg,
-	}
-	// TODO: move handling inside fx injector
-	options = append(options, WithTelemetry(cfg.Server.Name, "0.0.0.0:4317"))
-
-	// loop through our parsing options and apply them
-	for _, option := range options {
-		option(s)
 	}
 
 	lc.Append(fx.Hook{
