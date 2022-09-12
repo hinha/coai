@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 	"os"
 
 	"go.uber.org/zap"
@@ -11,7 +12,7 @@ import (
 
 type Logger struct {
 	*config.Config
-	zap     *zap.Logger
+	zap     *otelzap.Logger
 	closers []func() error
 }
 
@@ -45,7 +46,7 @@ func NewLogger(cfg *config.Config) *Logger {
 	core := zapcore.NewTee(zapCores...)
 	zp := zap.New(core)
 
-	return &Logger{Config: cfg, zap: zp, closers: []func() error{f.Close, zp.Sync}}
+	return &Logger{Config: cfg, zap: otelzap.New(zp), closers: []func() error{f.Close, zp.Sync}}
 }
 
 func (l *Logger) LogDefault() *zap.Logger {
@@ -58,10 +59,10 @@ func (l *Logger) LogDefault() *zap.Logger {
 	consoleEncoder := zapcore.NewConsoleEncoder(zapConfig.EncoderConfig)
 	zapConsole := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapConfig.Level)
 
-	return zap.New(zapcore.NewTee(zapConsole))
+	return zap.New(zapcore.NewTee(zapConsole)).WithOptions(zap.AddCaller())
 }
 
-func (l *Logger) Logger() *zap.Logger {
+func (l *Logger) Logger() *otelzap.Logger {
 	return l.zap
 }
 
