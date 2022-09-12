@@ -12,9 +12,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hinha/coai/config"
+	"github.com/hinha/coai/internal"
+	"github.com/hinha/coai/internal/security"
 	"github.com/hinha/coai/logger"
-	"github.com/hinha/coai/utils"
-	"github.com/hinha/coai/utils/security"
 )
 
 // Config defines the config for middleware
@@ -115,7 +115,7 @@ func NewLogger(config Config) fiber.Handler {
 	}
 }
 
-func logEncrypted(cipher utils.Cipher, c *fiber.Ctx) ([]zap.Field, error) {
+func logEncrypted(cipher internal.Cipher, c *fiber.Ctx) ([]zap.Field, error) {
 	bRequest, _ := json.Marshal(logger.Req(c))
 	request, err := cipher.EncryptText(string(bRequest))
 	if err != nil {

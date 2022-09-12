@@ -1,4 +1,4 @@
-package utils
+package internal
 
 type Cipher interface {
 	EncryptStandart(plaintext string) (string, error)

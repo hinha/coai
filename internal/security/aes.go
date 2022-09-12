@@ -9,9 +9,8 @@ import (
 	"encoding/base64"
 	b64 "encoding/base64"
 	"errors"
+	"github.com/hinha/coai/internal"
 	"io"
-
-	"github.com/hinha/coai/utils"
 )
 
 var (
@@ -25,7 +24,7 @@ type bearerCipher struct {
 	key string
 }
 
-func NewCipher(key string) utils.Cipher {
+func NewCipher(key string) internal.Cipher {
 	c := &bearerCipher{}
 	c.key = string(c.HashTo32Bytes(key))
 	return c
