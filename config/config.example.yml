@@ -39,6 +39,11 @@ log:
   timeformat: "2006/01/02 15:04:05.000"
   encrypted: false
 
+otel:
+  # TODO remove enabled config
+  enabled: true
+  server: 0.0.0.0:4317
+
 profiler:
   enabled: false
   server: http://localhost:4040

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 	"go.uber.org/zap"
 
 	"github.com/hinha/coai/config"
@@ -24,7 +25,7 @@ type Config struct {
 	Next func(c *fiber.Ctx) bool
 
 	// Logger defines zap logger instance
-	Logger *zap.Logger
+	Logger *otelzap.Logger
 
 	// AppConfig defines config by yaml
 	AppConfig *config.Config

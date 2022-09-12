@@ -54,6 +54,10 @@ type Config struct {
 			} `yaml:"mysql"`
 		} `yaml:"drivers"`
 	} `yaml:"database"`
+	Otel struct {
+		Enabled bool   `yaml:"enabled"`
+		Server  string `yaml:"server"`
+	}
 }
 
 type Jwt struct {
