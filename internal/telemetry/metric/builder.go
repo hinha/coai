@@ -11,17 +11,21 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/export"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+
+	"github.com/hinha/coai/internal/logger"
 )
 
 type CloseFunc func(ctx context.Context) error
 
-func NewMeterProviderBuilder() *meterProviderBuilder {
-	return &meterProviderBuilder{}
+func NewMeterProviderBuilder(log *logger.Logger) *meterProviderBuilder {
+	return &meterProviderBuilder{log: log}
 }
 
 type meterProviderBuilder struct {
 	exporter            export.Exporter
 	histogramBoundaries []float64
+
+	log *logger.Logger
 }
 
 func (b *meterProviderBuilder) SetExporter(exp export.Exporter) *meterProviderBuilder {
@@ -35,6 +39,7 @@ func (b *meterProviderBuilder) SetHistogramBoundaries(explicitBoundaries []float
 }
 
 func (b *meterProviderBuilder) Build() (metric.MeterProvider, CloseFunc, error) {
+	b.log.Console().Debug("Build metric provider")
 	if b.exporter == nil {
 		return nil, nil, fmt.Errorf("exporter is not set")
 	}

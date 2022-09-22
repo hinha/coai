@@ -2,10 +2,12 @@ package exporter
 
 import (
 	"context"
-	"github.com/hinha/coai/logger"
+
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.uber.org/zap"
+
+	"github.com/hinha/coai/internal/logger"
 )
 
 func NewMetricOTLP(endpoint string, log *logger.Logger) *otlpmetric.Exporter {
@@ -16,8 +18,9 @@ func NewMetricOTLP(endpoint string, log *logger.Logger) *otlpmetric.Exporter {
 
 	metricExp, err := otlpmetric.New(ctx, metricClient)
 	if err != nil {
-		log.LogDefault().Error("Failed to create the collector metric exporter", zap.Error(err))
+		log.Console().Fatal("Failed to create the collector metric exporter", zap.Error(err))
 	}
+	log.Console().Debug("Finish create the collector metric exporter")
 
 	return metricExp
 }
