@@ -3,23 +3,25 @@ package server
 import (
 	"context"
 	"fmt"
+	"os"
+	"runtime"
+	"strconv"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/hinha/coai/config"
-	"github.com/hinha/coai/internal/telemetry/exporter"
-	"github.com/hinha/coai/internal/telemetry/metric"
-	"github.com/hinha/coai/internal/telemetry/trace"
-	"github.com/hinha/coai/logger"
-	"github.com/hinha/coai/server/middlewares"
-	"github.com/hinha/coai/server/routes"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"os"
-	"runtime"
-	"strconv"
-	"time"
+
+	"github.com/hinha/coai/config"
+	"github.com/hinha/coai/internal/logger"
+	"github.com/hinha/coai/internal/telemetry/exporter"
+	"github.com/hinha/coai/internal/telemetry/metric"
+	"github.com/hinha/coai/internal/telemetry/trace"
+	"github.com/hinha/coai/server/middlewares"
+	"github.com/hinha/coai/server/routes"
 )
 
 func InitFiber(srv *Server) {
@@ -27,7 +29,7 @@ func InitFiber(srv *Server) {
 	// Register logger
 	srv.app.Use(middlewares.NewLogger(middlewares.Config{
 		AppConfig: srv.config,
-		Logger:    srv.logger.Logger(),
+		Logger:    srv.logger.Handler(),
 	}))
 
 	routes.SwaggerRoute(srv.app)  // Register a route for API Docs (Swagger).
@@ -39,7 +41,7 @@ func InitFiber(srv *Server) {
 		procs = "1"
 	}
 
-	srv.logger.LogDefault().Info("Preparing server",
+	srv.logger.Console().Info("Preparing server",
 		zap.String("addr", fmt.Sprintf("%s:%d", srv.config.Server.Host, srv.config.Server.Port)),
 		zap.Uint32("handlers", srv.app.HandlersCount()),
 		zap.String("num_cpu", procs),
@@ -51,12 +53,12 @@ func InitFiber(srv *Server) {
 	// define
 	if srv.config.Otel.Enabled {
 		metricExporter := exporter.NewMetricOTLP(srv.config.Otel.Server, srv.logger)
-		pusher, pusherCloseFn, err := metric.NewMeterProviderBuilder().
+		pusher, pusherCloseFn, err := metric.NewMeterProviderBuilder(srv.logger).
 			SetExporter(metricExporter).
 			SetHistogramBoundaries([]float64{5, 10, 25, 50, 100, 200, 400, 800, 1000}).
 			Build()
 		if err != nil {
-			srv.logger.LogDefault().Error("failed initializing the metric provider", zap.Error(err))
+			srv.logger.Console().Error("failed initializing the metric provider", zap.Error(err))
 		}
 		srv.Closers = append(srv.Closers, pusherCloseFn)
 		global.SetMeterProvider(pusher)
@@ -66,7 +68,7 @@ func InitFiber(srv *Server) {
 			SetExporter(spanExporter).
 			Build()
 		if err != nil {
-			srv.logger.LogDefault().Error("failed initializing the tracer provider", zap.Error(err))
+			srv.logger.Console().Error("failed initializing the tracer provider", zap.Error(err))
 		}
 		srv.Closers = append(srv.Closers, tracerProviderCloseFn)
 
@@ -86,11 +88,11 @@ func NewServer(lc fx.Lifecycle, cfg *config.Config, logger *logger.Logger) *Serv
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go s.Start()
-			logger.Logger().Info("Server serving", zap.Int("port", cfg.Server.Port))
+			logger.Console().Info("Server serving", zap.Int("port", cfg.Server.Port))
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			logger.Logger().Info("Server stopped")
+			logger.Console().Info("Server stopped")
 			return s.Close()
 		},
 	})
@@ -123,7 +125,7 @@ func (s *Server) Close() error {
 func (s *Server) Start() {
 	go func() {
 		if err := s.app.Listen(fmt.Sprintf("%s:%d", s.config.Server.Host, s.config.Server.Port)); err != nil {
-			s.logger.LogDefault().Fatal("Oops... Server is not running!", zap.Error(err))
+			s.logger.Console().Fatal("Oops... Server is not running!", zap.Error(err))
 		}
 	}()
 }
