@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/uptrace/opentelemetry-go-extra/otelzap"
+	zap_logger "github.com/hinha/zap-logger"
 	"go.uber.org/zap"
 
 	"github.com/hinha/coai/config"
 	"github.com/hinha/coai/internal"
+	"github.com/hinha/coai/internal/logger"
 	"github.com/hinha/coai/internal/security"
-	"github.com/hinha/coai/logger"
 )
 
 // Config defines the config for middleware
@@ -25,7 +25,7 @@ type Config struct {
 	Next func(c *fiber.Ctx) bool
 
 	// Logger defines zap logger instance
-	Logger *otelzap.Logger
+	Logger *zap_logger.Logger
 
 	// AppConfig defines config by yaml
 	AppConfig *config.Config
@@ -75,7 +75,7 @@ func NewLogger(config Config) fiber.Handler {
 
 		var fields []zap.Field
 		fields = append(fields,
-			zap.Namespace("context"),
+			zap.Namespace("api"),
 			zap.String("pid", strconv.Itoa(os.Getpid())),
 			zap.String("time", stop.Sub(start).String()),
 		)

@@ -2,12 +2,14 @@ package trace
 
 import (
 	"context"
-	"github.com/hinha/coai/logger"
+	"time"
+
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	"go.uber.org/zap"
-	"time"
+
+	"github.com/hinha/coai/internal/logger"
 )
 
 type CloseFunc func(ctx context.Context) error
@@ -31,7 +33,7 @@ func (b *traceProviderBuilder) SetExporter(exp trace.SpanExporter) *traceProvide
 }
 
 func (b *traceProviderBuilder) Build() (*trace.TracerProvider, CloseFunc, error) {
-	b.log.LogDefault().Info("Tracer provider Builder")
+	b.log.Console().Debug("Build tracer provider")
 
 	ctx := context.Background()
 	res, err := resource.New(ctx,
@@ -45,7 +47,7 @@ func (b *traceProviderBuilder) Build() (*trace.TracerProvider, CloseFunc, error)
 		),
 	)
 	if err != nil {
-		b.log.LogDefault().Error("Something tracer provider Builder", zap.Error(err))
+		b.log.Console().Error("Something tracer provider Builder", zap.Error(err))
 		return nil, nil, err
 	}
 
@@ -55,6 +57,7 @@ func (b *traceProviderBuilder) Build() (*trace.TracerProvider, CloseFunc, error)
 		trace.WithResource(res),
 		trace.WithSpanProcessor(bsp),
 	)
+
 	return tracerProvider, func(ctx context.Context) error {
 		cxt, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()

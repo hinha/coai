@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/hinha/coai/config"
+	z_logger "github.com/hinha/coai/internal/logger"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"log"
@@ -10,8 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hinha/coai/config"
-	"github.com/hinha/coai/logger"
 	"github.com/hinha/coai/server"
 )
 
@@ -41,11 +41,18 @@ func main() {
 	}()
 
 	app := fx.New(
-		fx.Provide(config.LoadSecret, logger.NewLogger),
+		fx.Provide(config.LoadSecret, func(config *config.Config) z_logger.Config {
+			return z_logger.Config{
+				Encoding:   string(config.Log.Output),
+				Mode:       string(config.Server.Mode),
+				LogPath:    config.Log.File.Path,
+				TimeFormat: config.Log.TimeFormat,
+			}
+		}, z_logger.New),
 		fx.Provide(server.NewServer),
 		fx.Invoke(server.InitFiber),
-		fx.WithLogger(func(log *logger.Logger) fxevent.Logger {
-			return &fxevent.ZapLogger{Logger: log.LogDefault()}
+		fx.WithLogger(func(log *z_logger.Logger) fxevent.Logger {
+			return log
 		}),
 	)
 

@@ -15,8 +15,8 @@ const (
 	Production  Mode = "production"
 
 	LogConsole LogOutput = "console"
-	LogFile    LogOutput = "file"
-	LogStdout  LogOutput = "stdout"
+	LogJson    LogOutput = "json"
+	LogMulti   LogOutput = "all"
 )
 
 type Config struct {
@@ -35,7 +35,6 @@ type Config struct {
 	Jwt Jwt `yaml:"jwt"`
 	Log struct {
 		Output LogOutput `yaml:"output"`
-		Format string    `yaml:"format"`
 		Color  bool      `yaml:"color"`
 		File   struct {
 			Path string `yaml:"path"`

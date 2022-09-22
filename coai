@@ -9,9 +9,9 @@ if [ ! -d "$SECRET" ]; then
 	echo "Creating folder $SECRET"
 fi
 
-if [ ! -d "storage" ]; then
-	mkdir storage
-	echo "Creating folder storage"
+if [ ! -d "log" ]; then
+	mkdir log
+	echo "Creating folder log"
 fi
 cd secret
 PUBLIC_KEY=public.pem

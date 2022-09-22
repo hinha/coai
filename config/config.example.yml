@@ -27,14 +27,12 @@ jwt:
   secret_key: EXAMPLE
 
 log:
-  # output must type file, console, stdout
+  # output must type console, json, and all multi writer
   # stdout it's possible multiple handlers both of them console and file handler.
-  output: stdout
-  # format must type text or json
-  format: console
-  color: true
+  output: all
+  color: false
   file:
-    path: storage/app.log
+    path: log/app.log
   timefield: timestamp
   timeformat: "2006/01/02 15:04:05.000"
   encrypted: false
