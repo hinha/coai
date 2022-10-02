@@ -29,10 +29,10 @@ jwt:
 log:
   # output must type console, json, and all multi writer
   # stdout it's possible multiple handlers both of them console and file handler.
-  output: all
+  output: console
   color: false
   file:
-    path: log/app.log
+    path: log/application.log
   timefield: timestamp
   timeformat: "2006/01/02 15:04:05.000"
   encrypted: false
