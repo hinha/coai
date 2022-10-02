@@ -17,6 +17,7 @@ exports
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+http_test/
 examples/
 storage/*.log
 secret/
