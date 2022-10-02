@@ -3,8 +3,24 @@ package logger
 import (
 	"os"
 
-	zap_logger "github.com/hinha/zap-logger"
+	"go.uber.org/fx"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/hinha/coai/config"
+	zap_logger "github.com/hinha/zap-logger"
+)
+
+var Module = fx.Module(
+	"logger",
+	fx.Provide(func(config *config.Config) Config {
+		return Config{
+			Encoding:   string(config.Log.Output),
+			Mode:       string(config.Server.Mode),
+			LogPath:    config.Log.File.Path,
+			TimeFormat: config.Log.TimeFormat,
+		}
+	}),
+	fx.Provide(New),
 )
 
 type Config struct {
@@ -56,6 +72,18 @@ func (log *Logger) Console() *zap_logger.ZapLogger {
 
 func (log *Logger) Handler() *zap_logger.ZapLogger {
 	return log.logHandler.WithOptions(zap_logger.AddCaller()).Named("handler")
+}
+
+func (log *Logger) Core() *zap_logger.ZapLogger {
+	return log.logConsole.WithOptions(zap_logger.AddCaller()).Named("core")
+}
+
+func (log *Logger) Gorm() *gormLogger {
+	logs := log.logConsole.WithOptions(zap_logger.AddCaller()).Named("db")
+	if logs.Level() == zapcore.DebugLevel {
+		return newGorm(logs, 3) // Warn Level
+	}
+	return newGorm(logs, 1) // Silent Level
 }
 
 func (log *Logger) Close() error {

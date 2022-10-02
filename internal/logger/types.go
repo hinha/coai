@@ -49,7 +49,7 @@ func (r *resp) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 type req struct {
 	Body     string     `json:"body"`
 	Fullpath string     `json:"fullPath"`
-	User     string     `json:"user"`
+	User     string     `json:"authority"`
 	IP       string     `json:"ip"`
 	Method   string     `json:"method"`
 	Route    string     `json:"router"`
@@ -105,7 +105,7 @@ func (r *req) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	}
 
 	if r.User != "" {
-		enc.AddString("user", r.User)
+		enc.AddString("authority", r.User)
 	}
 
 	err := enc.AddObject("headers", r.Headers)
