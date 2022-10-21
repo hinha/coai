@@ -29,10 +29,11 @@ jwt:
 log:
   # output must type console, json, and all multi writer
   # stdout it's possible multiple handlers both of them console and file handler.
-  output: console
+  output: all
   color: false
   file:
-    path: log/application.log
+    http: log/application.log
+    grpc: log/grpc.log
   timefield: timestamp
   timeformat: "2006/01/02 15:04:05.000"
   encrypted: false
@@ -47,6 +48,9 @@ profiler:
   server: http://localhost:4040
 
 server:
+  grpc:
+    host: localhost
+    port: 8001
   host: localhost
   name: COAI
   port: 8000
