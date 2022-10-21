@@ -14,24 +14,27 @@ var Module = fx.Module(
 	"logger",
 	fx.Provide(func(config *config.Config) Config {
 		return Config{
-			Encoding:   string(config.Log.Output),
-			Mode:       string(config.Server.Mode),
-			LogPath:    config.Log.File.Path,
-			TimeFormat: config.Log.TimeFormat,
+			Encoding:    config.Log.Output,
+			Mode:        string(config.Server.Mode),
+			HttpLogPath: config.Log.File.Http,
+			GrpcLogPath: config.Log.File.Grpc,
+			TimeFormat:  config.Log.TimeFormat,
 		}
 	}),
 	fx.Provide(New),
 )
 
 type Config struct {
-	Encoding   string
-	Mode       string
-	LogPath    string
-	TimeFormat string
+	Encoding    string
+	Mode        string
+	HttpLogPath string
+	GrpcLogPath string
+	TimeFormat  string
 }
 
 type Logger struct {
 	logHandler *zap_logger.ZapLogger
+	logGrpc    *zap_logger.ZapLogger
 	logConsole *zap_logger.ZapLogger
 
 	closers []func() error
@@ -45,7 +48,6 @@ func zapConfig(config Config) zap_logger.Config {
 		zapCfg = zap_logger.NewProductionConfig()
 	}
 	zapCfg.Encoding = config.Encoding
-	zapCfg.Filename = config.LogPath
 	zapCfg.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(config.TimeFormat)
 	return zapCfg
 }
@@ -58,11 +60,18 @@ func New(config Config) *Logger {
 	logConsole := zap_logger.New(zapcore.NewTee(zapConsole), zapConsoleCfg)
 
 	zapCfg := zapConfig(config)
+	// http config
+	zapCfg.Filename = config.HttpLogPath
 	logHandler := zap_logger.NewLogger(zapCfg)
+
+	// server config
+	zapCfg.Filename = config.GrpcLogPath
+	grpcLog := zap_logger.NewLogger(zapCfg)
 	return &Logger{
 		logHandler: logHandler,
+		logGrpc:    grpcLog,
 		logConsole: logConsole,
-		closers:    []func() error{logHandler.Sync, logConsole.Sync},
+		closers:    []func() error{logHandler.Sync, logConsole.Sync, grpcLog.Sync},
 	}
 }
 
@@ -84,6 +93,10 @@ func (log *Logger) Gorm() *gormLogger {
 		return newGorm(logs, 3) // Warn Level
 	}
 	return newGorm(logs, 1) // Silent Level
+}
+
+func (log *Logger) Grpc() *zap_logger.ZapLogger {
+	return log.logGrpc
 }
 
 func (log *Logger) Close() error {
