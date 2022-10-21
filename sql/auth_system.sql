@@ -8,7 +8,7 @@ CREATE TABLE `user` (
   `password` text NOT NULL,
   `intro` tinytext DEFAULT null,
   `status` varchar(8) NOT NULL DEFAULT "inactive",
-  `profile` text DEFAULT null COMMENT 'The user details.',
+  `profile` text DEFAULT null COMMENT 'The users details.',
   `user_groups_id` bigint(20) NOT NULL,
   `last_login` timestamp(6) DEFAULT "now()",
   `created_at` timestamp(6) DEFAULT "now()",
