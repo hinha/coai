@@ -18,11 +18,11 @@ type UserHTTP struct {
 	app app.Application
 }
 
-// UserAll method to get all user.
+// UserAll method to get all users.
 // @Description login authority.
-// @Summary get all user
+// @Summary get all users
 // @Success 200 {string} status "ok"
-// @Router /v1/user/all [get]
+// @Router /v1/users/all [get]
 func (h *UserHTTP) UserAll(c *fiber.Ctx) error {
 	users, err := h.app.Queries.AllUsers.Handle(c.UserContext(), query.AllUsers{})
 	if err != nil {
@@ -31,11 +31,11 @@ func (h *UserHTTP) UserAll(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"msg": "ok", "data": users})
 }
 
-// Register method to register user.
+// Register method to register users.
 // @Description login authority.
-// @Summary register user
+// @Summary register users
 // @Success 200 {string} status "ok"
-// @Router /v1/user/register [get]
+// @Router /v1/users/register [get]
 func (h *UserHTTP) Register(c *fiber.Ctx) error {
 	err := h.app.Commands.Register.Handle(c.UserContext(), command.RegisterUser{User: domain.User{
 		LastLogin:    time.Now(),
