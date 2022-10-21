@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"github.com/hinha/coai/core/users/domain"
 	"github.com/hinha/coai/internal/decorator"
 	"github.com/hinha/coai/internal/logger"
 )
@@ -36,4 +37,5 @@ func (l allTrainingsHandler) Handle(ctx context.Context, _ AllUsers) (tr []User,
 
 type AllUsersReadModel interface {
 	AllUsers(ctx context.Context) ([]User, error)
+	AddUserGroup(ctx context.Context, group *domain.UserGroup) error
 }

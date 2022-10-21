@@ -66,6 +66,10 @@ func New(config Config, logger *logger.Logger) *DB {
 		logger.Console().Fatal("failed to get sql db", zap.Error(err))
 	}
 
+	if err := sqlDB.Ping(); err != nil {
+		logger.Console().Fatal("failed to ping sql db", zap.Error(err))
+	}
+
 	sqlDB.SetMaxOpenConns(200)
 	logger.Console().Debug("finish initialize db")
 
@@ -73,6 +77,10 @@ func New(config Config, logger *logger.Logger) *DB {
 		Gorm: db,
 		sql:  sqlDB,
 	}
+}
+
+func (c *DB) Ping() error {
+	return c.sql.Ping()
 }
 
 func (c *DB) Close() error {

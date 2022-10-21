@@ -6,7 +6,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/hinha/coai/core/users/application/query"
 	"github.com/hinha/coai/core/users/domain"
-	mysql_internal "github.com/hinha/coai/internal/store/gorm/mysql"
+	"github.com/hinha/coai/internal/store/gorm/mysql"
 	"github.com/hinha/coai/internal/store/gorm/mysql/mocks"
 	"gorm.io/gorm"
 	"reflect"
@@ -69,7 +69,6 @@ func TestUserMysqlRepository_AddUser(t *testing.T) {
 				},
 			},
 			initMock: func() *gorm.DB {
-
 				mock.ExpectBegin()
 				mock.ExpectExec(
 					regexp.QuoteMeta("INSERT INTO `users` (`uuid`,`first_name`,`last_name`,`email`,`phone`,`password`,`intro`,`status`,`profile`,`user_groups_id`,`last_login`,`updated_at`,`deleted_at`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")).
@@ -86,7 +85,7 @@ func TestUserMysqlRepository_AddUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u := &UserMysqlRepository{
-				db: &mysql_internal.DB{Gorm: tt.initMock()},
+				db: &mysql.DB{Gorm: tt.initMock()},
 			}
 			if err := u.AddUser(tt.args.ctx, tt.args.user); (err != nil) != tt.wantErr {
 				t.Errorf("AddUser() error = %v, wantErr %v", err, tt.wantErr)
@@ -152,14 +151,14 @@ func TestUserMysqlRepository_AllUsers(t *testing.T) {
 			}},
 		},
 		{
-			name: "should error incorrect table",
+			name: "should error data not found",
 			args: args{
 				ctx: context.TODO(),
 			},
 			initMock: func() *gorm.DB {
 				mock.ExpectQuery(
-					regexp.QuoteMeta("SELECT * FROM `user`")).
-					WillReturnRows(sqlmock.NewRows([]string{"id", "uuid", "first_name", "last_name", "email"}))
+					regexp.QuoteMeta("SELECT * FROM `users` WHERE `users`.`deleted_at` IS NULL ORDER BY `users`.`created_at` DESC")).
+					WillReturnError(gorm.ErrRecordNotFound)
 
 				return db
 			},
@@ -169,7 +168,7 @@ func TestUserMysqlRepository_AllUsers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u := &UserMysqlRepository{
-				db: &mysql_internal.DB{Gorm: tt.initMock()},
+				db: &mysql.DB{Gorm: tt.initMock()},
 			}
 			got, err := u.AllUsers(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
@@ -241,7 +240,7 @@ func TestUserMysqlRepository_GetUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u := &UserMysqlRepository{
-				db: &mysql_internal.DB{Gorm: tt.initMock()},
+				db: &mysql.DB{Gorm: tt.initMock()},
 			}
 			got, err := u.GetUser(tt.args.ctx, tt.args.userID)
 			if (err != nil) != tt.wantErr {
@@ -257,7 +256,7 @@ func TestUserMysqlRepository_GetUser(t *testing.T) {
 
 func TestNewUserMysqlRepository(t *testing.T) {
 	type args struct {
-		db *mysql_internal.DB
+		db *mysql.DB
 	}
 	tests := []struct {
 		name string

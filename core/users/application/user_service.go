@@ -11,9 +11,17 @@ type Application struct {
 }
 
 type Commands struct {
-	Register command.RegisterUserHandler
+	Register        command.RegisterUserHandler
+	CreateGroup     command.CreateUserGroupHandler
+	UpdateGroup     command.UpdateUserGroupHandler
+	DeleteGroup     command.DeleteUserGroupHandler
+	ActivateGroup   command.ActivateUserGroupHandler
+	DeactivateGroup command.DeactivateUserGroupHandler
+	PingConnection  command.PingHandler
 }
 
 type Queries struct {
-	AllUsers query.AllUserHandler
+	AllUsers          query.AllUserHandler
+	GetGroup          query.GetGroupHandler
+	GroupAvailability query.GroupAvailabilityHandler
 }

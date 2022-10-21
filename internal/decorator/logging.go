@@ -2,11 +2,8 @@ package decorator
 
 import (
 	"context"
-	"fmt"
-
-	"go.uber.org/zap"
-
 	"github.com/hinha/coai/internal/logger"
+	"go.uber.org/zap"
 )
 
 type commandLoggingDecorator[C any] struct {
@@ -19,16 +16,11 @@ func (d commandLoggingDecorator[C]) Handle(ctx context.Context, cmd C) (err erro
 
 	log := d.logger.Core().With(
 		zap.String("command", handlerType),
-		zap.String("command_body", fmt.Sprintf("%#v", cmd)),
+		zap.Reflect("command_body", cmd),
 	)
 
-	log.Debug("Executing command")
 	defer func() {
-		if err == nil {
-			log.InfoCtx(ctx, "Command executed successfully")
-		} else {
-			log.ErrorCtx(ctx, "Failed to execute command", zap.Error(err))
-		}
+		log.DebugCtx(ctx, "Command executed", zap.Error(err))
 	}()
 
 	return d.base.Handle(ctx, cmd)
@@ -39,20 +31,15 @@ type queryLoggingDecorator[C any, R any] struct {
 	logger *logger.Logger
 }
 
-func (d queryLoggingDecorator[C, R]) Handle(ctx context.Context, cmd C) (result R, err error) {
+func (d queryLoggingDecorator[C, R]) Handle(ctx context.Context, query C) (result R, err error) {
 	log := d.logger.Core().With(
-		zap.String("query", generateActionName(cmd)),
-		zap.String("query_body", fmt.Sprintf("%#v", cmd)),
+		zap.String("query", generateActionName(query)),
+		zap.Reflect("query_body", query),
 	)
 
-	log.Debug("Executing query")
 	defer func() {
-		if err == nil {
-			log.InfoCtx(ctx, "Query executed successfully")
-		} else {
-			log.ErrorCtx(ctx, "Failed to execute query")
-		}
+		log.DebugCtx(ctx, "Query executed", zap.Error(err))
 	}()
 
-	return d.base.Handle(ctx, cmd)
+	return d.base.Handle(ctx, query)
 }

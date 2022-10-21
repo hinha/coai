@@ -2,9 +2,12 @@ package adapters
 
 import (
 	"context"
+	"errors"
 	"github.com/hinha/coai/core/users/application/query"
 	"github.com/hinha/coai/core/users/domain"
 	"github.com/hinha/coai/internal/store/gorm/mysql"
+	"gorm.io/gorm"
+	"strings"
 )
 
 type UserMysqlRepository struct {
@@ -20,7 +23,7 @@ func (u *UserMysqlRepository) userTable() *user {
 }
 
 func (u *UserMysqlRepository) AddUser(ctx context.Context, user *domain.User) error {
-	err := u.userTable().WithContext(ctx).Debug().Create(user)
+	err := u.userTable().WithContext(ctx).Create(user)
 	if err != nil {
 		return err
 	}
@@ -64,4 +67,17 @@ func (u *UserMysqlRepository) usersModelsToQuery(iter []*domain.User) ([]query.U
 	}
 
 	return users, nil
+}
+
+func wrapError(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return mysql.RecordNotFound
+	case strings.Contains(err.Error(), "1062: Duplicate"):
+		return mysql.DataAlreadyExists
+	default:
+		return err
+	}
 }

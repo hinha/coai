@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package users;
+
+option go_package = "github.com/hinha/coai/core/users";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service Health {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc Watch(google.protobuf.Empty) returns (stream HealthCheckResponse);
+}
+
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;  // Used only by the Watch method.
+  }
+  ServingStatus status = 1;
+  float downtime_duration = 2;
+  float uptime_duration = 3;
+}
+
+service UserGroupService {
+  rpc CreateGroup(CreateGroupRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateGroup(UpdateGroupRequest) returns (google.protobuf.Empty) {}
+  rpc DeleteGroup(DeleteGroupRequest) returns (google.protobuf.Empty) {}
+  rpc DeactivateGroup(DeactivateGroupRequest) returns (google.protobuf.Empty) {}
+  rpc ActivateGroup(ActivateGroupRequest) returns (google.protobuf.Empty) {}
+  rpc IsGroupAvailable(IsGroupAvailableRequest) returns (IsGroupAvailableResponse) {}
+  rpc GetGroup(GetGroupRequest) returns (GetGroupResponse) {}
+}
+
+message CreateGroupRequest {
+  string name = 1;
+  bool active = 2;
+  google.protobuf.Timestamp time = 3; // client timezone
+}
+
+message UpdateGroupRequest {
+  int64 id = 1;
+  bool active = 2;
+  google.protobuf.Timestamp time = 3; // client timezone
+}
+
+message DeleteGroupRequest {
+  int64 id = 1;
+  google.protobuf.Timestamp time = 2; // client timezone
+}
+
+message DeactivateGroupRequest {
+  int64 id = 1;
+  google.protobuf.Timestamp time = 2;
+}
+
+message ActivateGroupRequest {
+  int64 id = 1;
+  google.protobuf.Timestamp time = 2;
+}
+
+message GetGroupRequest {
+  int64 id = 1;
+  string name = 2;
+}
+
+message GetGroupResponse {
+  int64 id = 1;
+  string name = 2;
+  bool active = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Timestamp deleted_at = 6;
+}
+
+message IsGroupAvailableRequest {
+  string name = 1;
+}
+
+message IsGroupAvailableResponse {
+  bool is_available = 1;
+}

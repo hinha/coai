@@ -8,19 +8,13 @@ import (
 )
 
 type Mode string
-type LogOutput string
-
-const (
-	Development Mode = "development"
-	Production  Mode = "production"
-
-	LogConsole LogOutput = "console"
-	LogJson    LogOutput = "json"
-	LogMulti   LogOutput = "all"
-)
 
 type Config struct {
 	Server struct {
+		Grpc struct {
+			Host string `yaml:"host"`
+			Port int    `yaml:"port"`
+		} `yaml:"grpc"`
 		Host      string `yaml:"host"`
 		Name      string `yaml:"name"`
 		Port      int    `yaml:"port"`
@@ -34,13 +28,14 @@ type Config struct {
 	} `yaml:"profiler"`
 	Jwt Jwt `yaml:"jwt"`
 	Log struct {
-		Output LogOutput `yaml:"output"`
-		Color  bool      `yaml:"color"`
-		File   struct {
-			Path string `yaml:"path"`
+		Color     bool `yaml:"color"`
+		Encrypted bool `yaml:"encrypted"`
+		File      struct {
+			Http string `yaml:"path"`
+			Grpc string `yaml:"grpc"`
 		} `yaml:"file"`
+		Output     string `yaml:"output"`
 		TimeFormat string `yaml:"timeformat"`
-		Encrypted  bool   `yaml:"encrypted"`
 	} `yaml:"log"`
 	DB struct {
 		Drivers struct {

@@ -8,7 +8,7 @@ import (
 
 const TableNameUser = "users"
 
-// User mapped from table <user>
+// User mapped from table <users>
 type User struct {
 	ID           int64          `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	UUID         string         `gorm:"column:uuid;not null" json:"uuid"`
@@ -19,7 +19,7 @@ type User struct {
 	Password     string         `gorm:"column:password;not null" json:"password"`
 	Intro        string         `gorm:"column:intro" json:"intro"`
 	Status       string         `gorm:"column:status;not null;default:inactive" json:"status"`
-	Profile      string         `gorm:"column:profile" json:"profile"` // The user details.
+	Profile      string         `gorm:"column:profile" json:"profile"` // The users details.
 	UserGroupsID int64          `gorm:"column:user_groups_id;not null" json:"user_groups_id"`
 	LastLogin    time.Time      `gorm:"column:last_login" json:"last_login"`
 	CreatedAt    time.Time      `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
