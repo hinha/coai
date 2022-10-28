@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/hinha/coai/config"
 	"github.com/hinha/coai/core/users/service"
 	"github.com/hinha/coai/internal/logger"
@@ -25,7 +24,6 @@ func MakeServerCmd() *cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) error {
-			fmt.Println("file config", c.String("config"))
 
 			app := fx.New(
 				fx.Provide(config.LoadSecret),

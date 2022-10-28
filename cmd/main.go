@@ -21,7 +21,6 @@ func main() {
 	var app cli.App
 	app.Name = "coai"
 	app.Commands = topLevelCommands
-	fmt.Println(topLevelCommands)
 
 	sort.Slice(app.Commands, func(i, j int) bool {
 		return strings.Compare(app.Commands[i].Name, app.Commands[j].Name) < 0
